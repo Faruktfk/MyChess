@@ -70,9 +70,9 @@ public class BoardPanel extends JPanel implements MouseListener {
 					g.drawString(horizontalLabels.charAt(x)+"", bSize * (x+1) + marginX-bSize/7, bSize*(y+1)+marginY-bSize/20);
 				}
 				//TODO: For debugging
-//				g.setFont(new Font("Arial", Font.BOLD, 13));
-//				g.setColor(Color.blue);
-//				g.drawString("["+x+","+y+"]", x*bSize+marginX, y*bSize+11+marginY);
+				g.setFont(new Font("Arial", Font.BOLD, 13));
+				g.setColor(Color.blue);
+				g.drawString("["+x+","+y+"]", x*bSize+marginX, y*bSize+11+marginY);
 				// Until here
 			}
 			

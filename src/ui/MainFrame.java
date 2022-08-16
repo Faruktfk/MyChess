@@ -8,6 +8,7 @@ import javax.swing.JMenuBar;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import java.awt.Font;
+
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.KeyStroke;
 
@@ -28,8 +29,7 @@ public class MainFrame extends JFrame implements ComponentListener, WindowListen
 	
 	public static void main(String[] args) {
 		new MainFrame();
-
-}
+	}
 	private final String APP_NAME = "MyChess";
 	private final int WIDTH = 1000, HEIGHT = 900;
 	private int marginX = 0, marginY = 0;
@@ -65,10 +65,7 @@ public class MainFrame extends JFrame implements ComponentListener, WindowListen
 		resartGame.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_R, InputEvent.CTRL_DOWN_MASK));
 		resartGame.setFont(new Font("Calibri", Font.PLAIN, 12));
 		resartGame.setBackground(Color.WHITE);
-		resartGame.addActionListener(e -> {
-			PopUpWindow pp = new PopUpWindow();
-		});
-//		resartGame.addActionListener(e -> chessBoardPanel.newGame(GameLogic.LOCAL, Piece.WHITE));
+		resartGame.addActionListener(e -> chessBoardPanel.newGame(GameLogic.LOCAL, Piece.WHITE));
 		firstMenu.add(resartGame);
 		
 		JMenu gameModeMenu = new JMenu("Game Mode");
@@ -99,8 +96,11 @@ public class MainFrame extends JFrame implements ComponentListener, WindowListen
 		networkGameM.addActionListener(e -> {
 			PopUpWindow popup = new PopUpWindow("Settings", new String[] { "Player name", "Server IP-Address", "Server Port" });
 			String[] inputs = (String[]) popup.getInput();
-			if (inputs == null)
+			if (inputs == null) {
+				networkGameM.setSelected(false);
+				localGameM.setSelected(true);
 				return;
+			}
 			System.out.println("Username: " + inputs[0]);
 
 			try {
@@ -108,6 +108,17 @@ public class MainFrame extends JFrame implements ComponentListener, WindowListen
 
 				int side = chessClient.getSide();
 				if (side >= 0) {
+					if(new PopUpWindow(chessClient).getInput().equals(PopUpWindow.DENIED)) {
+						if (chessClient != null) {
+							chessClient.closeCommand();
+						}
+						chessClient = null;							
+						chessBoardPanel.newGame(GameLogic.LOCAL, Piece.WHITE);
+						localGameM.setSelected(true);
+						networkGameM.setSelected(false);
+						return;
+					}
+					
 					localGameM.setSelected(false);
 					GameLogic game = chessBoardPanel.newGame(GameLogic.NETWORK, side);
 					setTitle(APP_NAME + " - " + inputs[0] + " - " + inputs[1] + " - " + inputs[2]);

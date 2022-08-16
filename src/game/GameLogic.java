@@ -11,6 +11,7 @@ import ui.PopUpWindow;
 public class GameLogic {
 	public static int LOCAL = 0, NETWORK = 1;
 	public static String HORIZONTAL= "abcdefgh", VERTICAL = "12345678";
+	private static final int CALCULATE_FOR_MOVE = 10, CALCULATE_FOR_CHECK = 11, CALCULATE_FOR_CHECKMATE = 12;
 	
 	private Piece[][] board;
 	private int gameMode;
@@ -56,10 +57,10 @@ public class GameLogic {
 		if(board[y][x].getSide() != turn || (gameMode == GameLogic.NETWORK && turn!=side)) {
 			return null;
 		}
-		return calculatePMoves(x, y, true);
+		return calculatePMoves(x, y, CALCULATE_FOR_MOVE);
 	}
 	
-	private ArrayList<Point> calculatePMoves(int x, int y, boolean officialBussiness){
+	private ArrayList<Point> calculatePMoves(int x, int y, int purpose){
 		Piece piece = board[y][x];
 		ArrayList<Point> output = new ArrayList<>();
 		int[][] moves = Piece.moves[piece.getName()];
@@ -75,7 +76,7 @@ public class GameLogic {
 				int nx = x + dx;
 				int ny = y + dy;
 				boolean out = nx < 0 || nx >= board[0].length || ny < 0 || ny >= board.length ? true : false;
-				while (!out && board[ny][nx] == null) {
+				while (!out && (board[ny][nx] == null || purpose == CALCULATE_FOR_CHECKMATE)) {
 					output.add(new Point(nx, ny));
 					nx += dx;
 					ny += dy;
@@ -94,13 +95,13 @@ public class GameLogic {
 						|| board[dy + y][dx + x] != null && board[dy + y][dx + x].getSide() == piece.getSide()) {
 					continue;
 				}
-				if (piece.getName() == Piece.PAWN && (i == 0 && board[dy + y][dx + x] != null || i == 1 && ((y != 1 && y != 6) || board[dy/2+y][dx+x]!=null || board[dy+y][dx+x]!=null) || i > 1 && board[dy + y][dx + x] == null)) {
+				if (piece.getName() == Piece.PAWN && (i == 0 && board[dy + y][dx + x] != null || i == 1 && ((y != 1 && y != 6) || board[dy/2+y][dx+x]!=null || board[dy+y][dx+x]!=null) || i > 1 && purpose == CALCULATE_FOR_MOVE && board[dy + y][dx + x] == null)) {
 					continue;
 				}
 				
 				if(piece.getName() == Piece.KING && i>7 && (piece.getAlreadyMoved() ||  (dx==-2 ? board[y][3] != null || board[y][1] != null || board[y][0] == null || board[y][0].getAlreadyMoved() : board[y][5] != null || board[y][7] == null || board[y][7].getAlreadyMoved())) ) {
 					continue;
-				}else if (piece.getName() == Piece.KING && i>7 && officialBussiness){
+				}else if (piece.getName() == Piece.KING && i>7 && purpose == CALCULATE_FOR_MOVE){
 					castling = piece.getSide();
 				}
 					
@@ -111,6 +112,24 @@ public class GameLogic {
 		if(enPassant.containsKey(piece)) {
 			output.add(enPassant.get(piece));	
 		}	
+		
+		if(piece.getName() == Piece.KING && piece.getSide() == turn && purpose == CALCULATE_FOR_MOVE) {
+			int oldNumofOutput = output.size();
+			String oldOutput = output.toString();
+			for(int yOpponent = 0; yOpponent<board.length; yOpponent++) {
+				for(int xOpponent = 0; xOpponent<board[yOpponent].length; xOpponent++) {
+					Piece opponent = board[yOpponent][xOpponent];
+					if(opponent != null && opponent.getSide()!=turn) {
+						ArrayList<Point> opponentPMoves = calculatePMoves(xOpponent, yOpponent, CALCULATE_FOR_CHECKMATE);
+						if(opponentPMoves != null) {
+							output.removeAll(opponentPMoves);
+						}
+					}
+				}
+			}
+			System.out.println(piece.getSide() + " King: "+ oldNumofOutput + " -> " +output.size() + "\t||\t" + oldOutput + " -> " + output.toString());
+			
+		}
 		
 		piece.setCountAvailablePos(output.size());
 		return output;
@@ -145,7 +164,7 @@ public class GameLogic {
 			
 			// Incase of Check
 			int tempCheck = check;
-			check = checkCheck();
+			check = isInCheck();
 			if(check==turn) {
 				board[y][x] = tempPiece;
 				board[oldY][oldX] = piece;
@@ -198,11 +217,11 @@ public class GameLogic {
 	}
 	
 	//Looking for Check
-	private int checkCheck() { 
+	private int isInCheck() { 
 		for(int y = 0; y<board.length; y++) {
 			for(int x = 0; x<board[y].length; x++) {
 				if(board[y][x] == null)continue;
-				ArrayList<Point> possibleActions = calculatePMoves(x, y, false);
+				ArrayList<Point> possibleActions = calculatePMoves(x, y, CALCULATE_FOR_CHECK);
 				for(Point p : possibleActions) {
 					for(int i = 0; i<2; i++) {
 						if(kings[i].getLocation().equals(p) && board[y][x].getSide() != i) {
@@ -231,6 +250,12 @@ public class GameLogic {
 //			}
 //		}
 //		return false;
+	
+	private boolean lookForCheckMate() {
+//		for(int i = 0; i<)
+		
+		return true;
+	}
 	
 	
 	public Piece[][] getBoard() {
@@ -264,9 +289,9 @@ public class GameLogic {
 		System.out.println();
 		for (int y = 0; y < board.length; y++) {
 			for (int x = 0; x < board[y].length; x++) {
-//					((board[y][x] == null ? "[   ]" : "[" + board[y][x].getLocation().x + ","+board[y][x].getLocation().y + "]") + " ");
+				System.out.print((board[y][x] == null ? "[   ]" : "[" + board[y][x].getLocation().x + ","+board[y][x].getLocation().y + "]") + " ");
 //				System.out.print((board[y][x] == null ? "[ ]" : "[" + board[y][x].getSide() + "]") + " ");
-				System.out.print((board[y][x] == null ? "[ ]" : "[" + board[y][x].getNameShort() + "]") + " ");
+//				System.out.print((board[y][x] == null ? "[ ]" : "[" + board[y][x].getNameShort() + "]") + " ");
 
 			}
 			System.out.println();

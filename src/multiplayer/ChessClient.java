@@ -15,6 +15,7 @@ public class ChessClient {
 	private BufferedReader bufferedReader;
 	private BufferedWriter bufferedWriter;
 	private boolean isConnection;
+	private boolean isOpponentPresent;
 	private int side = -1;
 	private int turn;
 	
@@ -124,5 +125,9 @@ public class ChessClient {
 	
 	public boolean getIsConnection() {
 		return isConnection;
+	}
+	
+	public boolean getIsOpponentPresent() {
+		return isOpponentPresent;
 	}
 }

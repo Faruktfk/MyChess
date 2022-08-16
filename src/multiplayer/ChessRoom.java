@@ -10,7 +10,7 @@ import java.util.ArrayList;
 
 public class ChessRoom {
 
-	public static final String CLOSE_COMMAND = "close!";
+	public static final String CLOSE_COMMAND = "close!", OPPONENT_PRESENT = "OpponentIsStillThere", OPPONENT_LEFT = "OpponentHasLeft";
 	private static ArrayList<ChessRoom> chessRooms = new ArrayList<>();
 
 	public static ChessRoom findAvailableChessRoom() {
