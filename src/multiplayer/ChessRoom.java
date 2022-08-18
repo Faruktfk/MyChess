@@ -10,7 +10,7 @@ import java.util.ArrayList;
 
 public class ChessRoom {
 
-	public static final String CLOSE_COMMAND = "close!", OPPONENT_PRESENT = "OpponentIsStillThere", OPPONENT_LEFT = "OpponentHasLeft";
+	public static final String CLOSE_COMMAND = "close!", DONTWAIT_COMMAND = "continueplzzz!", OPPONENT_PRESENT = "OpponentIsStillThere", OPPONENT_LEFT = "OpponentHasLeft";
 	private static ArrayList<ChessRoom> chessRooms = new ArrayList<>();
 
 	public static ChessRoom findAvailableChessRoom() {
@@ -43,8 +43,6 @@ public class ChessRoom {
 	}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-	// - - - - - - - - - - - - - - - - - - - - - - - - - -
-
 	
 	private int playerCount = 0;
 	private ArrayList<Player> players = new ArrayList<>();
@@ -56,22 +54,24 @@ public class ChessRoom {
 
 	public void addPlayer(Socket client) {
 		if (playerCount < 2) {
-			players.add(new Player(this, client));
-			players.get(players.size()-1).write(players.size()-1 + "");
-			playerCount++;						
+			players.add(new Player(this, client, players.size()-1));
+			players.get(playerCount).write(playerCount + "");
+			playerCount++;		
+		}
+		if(playerCount == 2) {
+			for(Player p: players) {
+				p.write(DONTWAIT_COMMAND);
+			}
 		}
 	}
 
+	
 	private void removePlayer(Player player) {
 		players.remove(player);
 		playerCount = players.size();
 		if(players.size()==0) {
 			chessRooms.remove(this);		
 		}		
-	}
-	
-	public boolean NeedToWaitForPlayer() {
-		return players.size() == 2 ? true : false;
 	}
 	
 	private void broadCastMove(Player player, String move) {
@@ -89,7 +89,7 @@ public class ChessRoom {
 		boolean isConnected;
 
 		
-		public Player(ChessRoom chessRoom, Socket socket) {
+		public Player(ChessRoom chessRoom, Socket socket, int side) {
 			this.chessRoom = chessRoom;
 			try {
 				this.socket = socket;
@@ -97,8 +97,13 @@ public class ChessRoom {
 				bufferedReader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 				bufferedWriter = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
 				
+//				bufferedWriter.write(side + "");
+//				bufferedWriter.newLine();
+//				bufferedWriter.flush();
+				
 				name = bufferedReader.readLine();
 				System.out.println(name + " joined the room!");
+				
 				listenIncoming();
 			} catch (IOException e) {
 				closeEverything();

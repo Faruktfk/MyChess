@@ -29,6 +29,11 @@ public class MainFrame extends JFrame implements ComponentListener, WindowListen
 	
 	public static void main(String[] args) {
 		new MainFrame();
+//		
+////		byte b = 0b0010_0101;
+//		byte b = Byte.parseByte("0b1011");
+// 
+//		System.out.println(b);
 	}
 	private final String APP_NAME = "MyChess";
 	private final int WIDTH = 1000, HEIGHT = 900;
@@ -109,6 +114,7 @@ public class MainFrame extends JFrame implements ComponentListener, WindowListen
 				int side = chessClient.getSide();
 				if (side >= 0) {
 					if(new PopUpWindow(chessClient).getInput().equals(PopUpWindow.DENIED)) {
+						System.out.println("Waiting: Denied");
 						if (chessClient != null) {
 							chessClient.closeCommand();
 						}
@@ -117,6 +123,8 @@ public class MainFrame extends JFrame implements ComponentListener, WindowListen
 						localGameM.setSelected(true);
 						networkGameM.setSelected(false);
 						return;
+					}else {
+						System.out.println("Waiting: Allowed");
 					}
 					
 					localGameM.setSelected(false);
@@ -225,15 +233,22 @@ public class MainFrame extends JFrame implements ComponentListener, WindowListen
 
 }
 
+//--Done
+//Pawn promotion!!
+//If black is my side, the board needs to be rotated accordingly +
+//Networking
+//En passan
 
-// TODO: Kings cannot get too close to each other!!
-// TODO: Pawn promotion!!
-// TODO: If black is my side, the board needs to be rotated accordingly +
-// TODO: Stalemate : when the King is not under threat and cannot move to anywhere else. => draw (No one wins)
 
-// TODO: Save the current game
+//--In progress
 // TODO: Wait for the opponent!!!!
 
-//  MUST HAVE: 		check mate;	 draw;	 pawn promotion;
+
+//--Future
+// TODO: Networking issues
+// TODO: Save the current game
+// TODO: Kings cannot get too close to each other!!
+// TODO: Stalemate : when the King is not under threat and cannot move to anywhere else. => draw (No one wins)
+// TODO: Check mate
 
 

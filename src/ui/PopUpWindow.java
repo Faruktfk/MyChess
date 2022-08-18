@@ -145,6 +145,7 @@ public class PopUpWindow {
  * @param client A ChessClient Object is needed to detect an opponent's connection.
  */
 	public PopUpWindow(ChessClient client) {
+		output = "-1";
 		int width = 400, height = 200;
 		JPanel dialog = new JPanel();
 
@@ -163,10 +164,38 @@ public class PopUpWindow {
 		panel.add(loading);
 
 		String[] options = new String[] { "Cancel" };
-		JOptionPane.showOptionDialog(null, dialog, "Waiting...", JOptionPane.CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE,
-				null, options, options[0]);
-
+		
+		long startTime = System.currentTimeMillis();
+		new Thread(() -> {
+			while(!loading.endWaiting) {
+				try {
+					Thread.sleep(1000);
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+				
+				Window[] windows = Window.getWindows();
+				for (int i = 0; i < windows.length; i++) {
+					if (windows[i] instanceof JDialog) {
+						JDialog d = (JDialog)windows[i];
+						boolean isTimeOut = System.currentTimeMillis()-startTime > 50000;
+						boolean close = isTimeOut || !d.isShowing() || !client.getWaitOpponent();						
+						if (d.getTitle().equals("Waiting...") && close) {
+							loading.timer.stop();
+							loading.endWaiting = true;
+							d.dispose();
+							
+						}
+					}
+				}
+			}
+			
+		}).start();
+		
+		JOptionPane.showOptionDialog(null, dialog, "Waiting...", JOptionPane.CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE, null, options, options[0]);
+		loading.endWaiting = true;
 		output = DENIED;
+		System.out.println("Wait Deny: 1");
 
 	}
 
@@ -177,12 +206,14 @@ public class PopUpWindow {
 	@SuppressWarnings("serial")
 	private class LoadingPanel extends JPanel implements ActionListener {
 
+		private boolean endWaiting;
 		private Timer timer;
 		private int maxX, maxY;
 		private int progress;
 		private ChessClient client;
 
 		public LoadingPanel(ChessClient client) {
+			endWaiting = false;
 			timer = new Timer(500, this);
 			this.client = client;
 			int width = 145;
@@ -200,21 +231,6 @@ public class PopUpWindow {
 			progress = progress >= maxX ? 10 : progress + 10;
 			repaint();
 
-			Window[] windows = Window.getWindows();
-			for (int i = 0; i < windows.length; i++) {
-				if (windows[i] instanceof JDialog) {
-					JDialog d = (JDialog)windows[i];
-					if (d.getTitle().equals("Waiting...") && !d.isActive()) {
-						output = DENIED;
-						timer.stop();							
-					}
-				}
-
-			}
-			if (client.getIsOpponentPresent()) {
-				output = ALLOWED;
-				timer.stop();
-			}
 
 		}
 
