@@ -137,13 +137,13 @@ public class PopUpWindow {
 
 	}
 
-
-/**
- * Constructor for Waiting Pop-Up. 
- * To let the user know, that he has to wait for another player.
- * 
- * @param client A ChessClient Object is needed to detect an opponent's connection.
- */
+	/**
+	 * Constructor for Waiting Pop-Up. To let the user know, that he has to wait for
+	 * another player.
+	 * 
+	 * @param client A ChessClient Object is needed to detect an opponent's
+	 *               connection.
+	 */
 	public PopUpWindow(ChessClient client) {
 		output = "-1";
 		int width = 400, height = 200;
@@ -160,42 +160,45 @@ public class PopUpWindow {
 		msg.setOpaque(true);
 		panel.add(msg);
 
-		LoadingPanel loading = new LoadingPanel(client);
+		LoadingPanel loading = new LoadingPanel();
 		panel.add(loading);
 
 		String[] options = new String[] { "Cancel" };
-		
+
 		long startTime = System.currentTimeMillis();
 		new Thread(() -> {
-			while(!loading.endWaiting) {
+			while (!loading.endWaiting) {
 				try {
 					Thread.sleep(1000);
 				} catch (InterruptedException e) {
 					e.printStackTrace();
 				}
-				
+
 				Window[] windows = Window.getWindows();
 				for (int i = 0; i < windows.length; i++) {
 					if (windows[i] instanceof JDialog) {
-						JDialog d = (JDialog)windows[i];
-						boolean isTimeOut = System.currentTimeMillis()-startTime > 50000;
-						boolean close = isTimeOut || !d.isShowing() || !client.getWaitOpponent();						
+						JDialog d = (JDialog) windows[i];
+						boolean isTimeOut = System.currentTimeMillis() - startTime > 50000;
+						boolean close = isTimeOut || !d.isShowing() || client.getStopWaitingForOpponent();
 						if (d.getTitle().equals("Waiting...") && close) {
 							loading.timer.stop();
 							loading.endWaiting = true;
 							d.dispose();
-							
+							output = client.getStopWaitingForOpponent() ? ALLOWED : DENIED;
+							if (isTimeOut) {
+								JOptionPane.showMessageDialog(null, "Waiting Timeout, process cancelled.", "Error",
+										JOptionPane.ERROR_MESSAGE, null);
+							}
 						}
 					}
 				}
 			}
-			
+
 		}).start();
-		
-		JOptionPane.showOptionDialog(null, dialog, "Waiting...", JOptionPane.CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE, null, options, options[0]);
+
+		JOptionPane.showOptionDialog(null, dialog, "Waiting...", JOptionPane.CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE,
+				null, options, options[0]);
 		loading.endWaiting = true;
-		output = DENIED;
-		System.out.println("Wait Deny: 1");
 
 	}
 
@@ -210,12 +213,10 @@ public class PopUpWindow {
 		private Timer timer;
 		private int maxX, maxY;
 		private int progress;
-		private ChessClient client;
 
-		public LoadingPanel(ChessClient client) {
+		public LoadingPanel() {
 			endWaiting = false;
 			timer = new Timer(500, this);
-			this.client = client;
 			int width = 145;
 			int height = 10;
 
@@ -230,8 +231,6 @@ public class PopUpWindow {
 		public void actionPerformed(ActionEvent e) {
 			progress = progress >= maxX ? 10 : progress + 10;
 			repaint();
-
-
 		}
 
 		@Override

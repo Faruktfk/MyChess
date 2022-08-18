@@ -15,14 +15,14 @@ public class ChessClient {
 	private BufferedReader bufferedReader;
 	private BufferedWriter bufferedWriter;
 	private boolean isConnection;
-	private boolean waitOpponent;
+	private boolean stopWaitingForOpponent;
 	private int side = -1;
 	private int turn;
 	
 	private String lastMove = EMPTY;
 
 	public ChessClient(String playerName, String ip, int port) {
-		waitOpponent = true;
+		stopWaitingForOpponent = false;
 		try {
 			socket = new Socket(ip, port);
 			isConnection = true;
@@ -79,8 +79,7 @@ public class ChessClient {
 					if(message == null || message.equals(ChessRoom.CLOSE_COMMAND)) {
 						isConnection = false;
 					}else if(message.contains(ChessRoom.DONTWAIT_COMMAND))  {
-						System.out.println(message);
-						waitOpponent = false;
+						stopWaitingForOpponent = true;
 					}else if(message.contains(MOVE))  {
 						lastMove = message.split(MOVE)[1];
 					}
@@ -132,7 +131,7 @@ public class ChessClient {
 		return isConnection;
 	}
 	
-	public boolean getWaitOpponent() {
-		return waitOpponent;
+	public boolean getStopWaitingForOpponent() {
+		return stopWaitingForOpponent;
 	}
 }

@@ -28,12 +28,7 @@ import java.awt.event.InputEvent;
 public class MainFrame extends JFrame implements ComponentListener, WindowListener {
 	
 	public static void main(String[] args) {
-		new MainFrame();
-//		
-////		byte b = 0b0010_0101;
-//		byte b = Byte.parseByte("0b1011");
-// 
-//		System.out.println(b);
+		new MainFrame();		
 	}
 	private final String APP_NAME = "MyChess";
 	private final int WIDTH = 1000, HEIGHT = 900;
@@ -106,7 +101,7 @@ public class MainFrame extends JFrame implements ComponentListener, WindowListen
 				localGameM.setSelected(true);
 				return;
 			}
-			System.out.println("Username: " + inputs[0]);
+//			System.out.println("Username: " + inputs[0]);
 
 			try {
 				chessClient = new ChessClient(inputs[0], inputs[1], Integer.parseInt(inputs[2]));
@@ -114,7 +109,6 @@ public class MainFrame extends JFrame implements ComponentListener, WindowListen
 				int side = chessClient.getSide();
 				if (side >= 0) {
 					if(new PopUpWindow(chessClient).getInput().equals(PopUpWindow.DENIED)) {
-						System.out.println("Waiting: Denied");
 						if (chessClient != null) {
 							chessClient.closeCommand();
 						}
@@ -123,8 +117,6 @@ public class MainFrame extends JFrame implements ComponentListener, WindowListen
 						localGameM.setSelected(true);
 						networkGameM.setSelected(false);
 						return;
-					}else {
-						System.out.println("Waiting: Allowed");
 					}
 					
 					localGameM.setSelected(false);

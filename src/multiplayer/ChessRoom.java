@@ -10,7 +10,8 @@ import java.util.ArrayList;
 
 public class ChessRoom {
 
-	public static final String CLOSE_COMMAND = "close!", DONTWAIT_COMMAND = "continueplzzz!", OPPONENT_PRESENT = "OpponentIsStillThere", OPPONENT_LEFT = "OpponentHasLeft";
+	public static final String CLOSE_COMMAND = "close!", DONTWAIT_COMMAND = "continueplzzz!",
+			OPPONENT_PRESENT = "OpponentIsStillThere", OPPONENT_LEFT = "OpponentHasLeft";
 	private static ArrayList<ChessRoom> chessRooms = new ArrayList<>();
 
 	public static ChessRoom findAvailableChessRoom() {
@@ -33,17 +34,17 @@ public class ChessRoom {
 			cr.players.removeAll(toRemovePlayer);
 		}
 	}
-	
+
 	public static int getPlayerCount() {
 		int count = 0;
-		for(ChessRoom cr : chessRooms) {
-			count+=cr.players.size();
+		for (ChessRoom cr : chessRooms) {
+			count += cr.players.size();
 		}
 		return count;
 	}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-	
+
 	private int playerCount = 0;
 	private ArrayList<Player> players = new ArrayList<>();
 
@@ -54,33 +55,33 @@ public class ChessRoom {
 
 	public void addPlayer(Socket client) {
 		if (playerCount < 2) {
-			players.add(new Player(this, client, players.size()-1));
+			players.add(new Player(this, client, players.size() - 1));
 			players.get(playerCount).write(playerCount + "");
-			playerCount++;		
+			playerCount++;
 		}
-		if(playerCount == 2) {
-			for(Player p: players) {
+		if (playerCount == 2) {
+			for (Player p : players) {
 				p.write(DONTWAIT_COMMAND);
 			}
 		}
 	}
 
-	
 	private void removePlayer(Player player) {
 		players.remove(player);
 		playerCount = players.size();
-		if(players.size()==0) {
-			chessRooms.remove(this);		
-		}		
+		if (players.size() == 0) {
+			chessRooms.remove(this);
+		}
 	}
-	
+
 	private void broadCastMove(Player player, String move) {
 		players.get(1 - players.indexOf(player)).write(move);
 	}
-	
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
-	
-	private class Player{
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+	// - - - - - - - - - -
+
+	private class Player {
 		ChessRoom chessRoom;
 		String name;
 		Socket socket;
@@ -88,7 +89,6 @@ public class ChessRoom {
 		BufferedWriter bufferedWriter;
 		boolean isConnected;
 
-		
 		public Player(ChessRoom chessRoom, Socket socket, int side) {
 			this.chessRoom = chessRoom;
 			try {
@@ -96,21 +96,17 @@ public class ChessRoom {
 				isConnected = true;
 				bufferedReader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 				bufferedWriter = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
-				
-//				bufferedWriter.write(side + "");
-//				bufferedWriter.newLine();
-//				bufferedWriter.flush();
-				
+
 				name = bufferedReader.readLine();
 				System.out.println(name + " joined the room!");
-				
+
 				listenIncoming();
 			} catch (IOException e) {
 				closeEverything();
 			}
-				
+
 		}
-		
+
 		private void write(String msg) {
 			try {
 				bufferedWriter.write(msg);
@@ -120,25 +116,25 @@ public class ChessRoom {
 				closeEverything();
 			}
 		}
-		
+
 		private void listenIncoming() {
 			new Thread(() -> {
-				while(isConnected) {
+				while (isConnected) {
 					try {
 						String msg = bufferedReader.readLine();
-						if(msg == null || msg.equals(CLOSE_COMMAND)) {
+						if (msg == null || msg.equals(CLOSE_COMMAND)) {
 							isConnected = false;
 							chessRoom.removePlayer(this);
-						}else {
+						} else {
 							chessRoom.broadCastMove(this, msg);
 						}
 					} catch (IOException e) {
 						closeEverything();
-					}		
-				}		
+					}
+				}
 			}).start();
 		}
-		
+
 		private void closeEverything() {
 			System.out.println(this.name + " is leaving");
 			isConnected = false;
