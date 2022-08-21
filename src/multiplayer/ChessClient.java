@@ -15,7 +15,7 @@ public class ChessClient {
 	private BufferedReader bufferedReader;
 	private BufferedWriter bufferedWriter;
 	private boolean isConnection;
-	private boolean stopWaitingForOpponent;
+	private boolean stopWaitingForOpponent, opponentPresent;
 	private int side = -1;
 	private int turn;
 	
@@ -23,6 +23,7 @@ public class ChessClient {
 
 	public ChessClient(String playerName, String ip, int port) {
 		stopWaitingForOpponent = false;
+		opponentPresent = false;
 		try {
 			socket = new Socket(ip, port);
 			isConnection = true;
@@ -80,6 +81,9 @@ public class ChessClient {
 						isConnection = false;
 					}else if(message.contains(ChessRoom.DONTWAIT_COMMAND))  {
 						stopWaitingForOpponent = true;
+						opponentPresent = true;
+					}else if(message.contains(ChessRoom.OPPONENT_LEFT))  {
+						opponentPresent = false;
 					}else if(message.contains(MOVE))  {
 						lastMove = message.split(MOVE)[1];
 					}
@@ -133,5 +137,9 @@ public class ChessClient {
 	
 	public boolean getStopWaitingForOpponent() {
 		return stopWaitingForOpponent;
+	}
+	
+	public boolean getOpponentPresent() {
+		return opponentPresent;		
 	}
 }

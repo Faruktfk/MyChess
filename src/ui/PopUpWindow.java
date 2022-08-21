@@ -32,6 +32,16 @@ public class PopUpWindow {
 	private Object output;
 	private int currentImageIndex;
 
+	
+	/**
+	 * Constructor for a reusable Notification-Pop-Up
+	 * @param msg A String to display in the notification. 
+	 */
+	public PopUpWindow(String msg) {
+		JOptionPane.showMessageDialog(null, msg);
+	}
+	
+	
 	/**
 	 * Constructor for a reusable Pop-Up for Inputs.
 	 * 
@@ -124,7 +134,7 @@ public class PopUpWindow {
 					.getScaledInstance(200, 200, Image.SCALE_SMOOTH)));
 		});
 
-		String[] options = new String[] { "Save & Exit" };
+		String[] options = new String[] { "Choose" };
 
 		int choice = JOptionPane.showOptionDialog(null, dialog, "Pawn Promotion", JOptionPane.OK_CANCEL_OPTION,
 				JOptionPane.PLAIN_MESSAGE, null, options, options[0]);
@@ -196,9 +206,14 @@ public class PopUpWindow {
 
 		}).start();
 
-		JOptionPane.showOptionDialog(null, dialog, "Waiting...", JOptionPane.CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE,
+		int choice = JOptionPane.showOptionDialog(null, dialog, "Waiting...", JOptionPane.CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE,
 				null, options, options[0]);
 		loading.endWaiting = true;
+	
+		if(choice == 0) {
+			loading.endWaiting = true;
+			output = DENIED;
+		}
 
 	}
 

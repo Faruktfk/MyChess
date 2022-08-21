@@ -10,8 +10,7 @@ import java.util.ArrayList;
 
 public class ChessRoom {
 
-	public static final String CLOSE_COMMAND = "close!", DONTWAIT_COMMAND = "continueplzzz!",
-			OPPONENT_PRESENT = "OpponentIsStillThere", OPPONENT_LEFT = "OpponentHasLeft";
+	public static final String CLOSE_COMMAND = "close!", DONTWAIT_COMMAND = "continueplzzz!", OPPONENT_LEFT = "OpponentHasLeft";
 	private static ArrayList<ChessRoom> chessRooms = new ArrayList<>();
 
 	public static ChessRoom findAvailableChessRoom() {
@@ -69,6 +68,9 @@ public class ChessRoom {
 	private void removePlayer(Player player) {
 		players.remove(player);
 		playerCount = players.size();
+		for(Player otherPlayer: players) {
+			otherPlayer.write(OPPONENT_LEFT);
+		}
 		if (players.size() == 0) {
 			chessRooms.remove(this);
 		}

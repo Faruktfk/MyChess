@@ -101,7 +101,7 @@ public class MainFrame extends JFrame implements ComponentListener, WindowListen
 				localGameM.setSelected(true);
 				return;
 			}
-//			System.out.println("Username: " + inputs[0]);
+			System.out.println("Username: " + inputs[0]);
 
 			try {
 				chessClient = new ChessClient(inputs[0], inputs[1], Integer.parseInt(inputs[2]));
@@ -136,6 +136,11 @@ public class MainFrame extends JFrame implements ComponentListener, WindowListen
 									if(!networkMove.equals(ChessClient.EMPTY)) {
 										game.networkMove(networkMove);
 										chessBoardPanel.repaint();
+									}
+									
+									if(chessClient.getStopWaitingForOpponent() && !chessClient.getOpponentPresent()) {
+										localGameM.doClick();										
+										new PopUpWindow("Opponent has left the game, Username: " + inputs[0] + " won!");
 									}
 								}
 							} catch (InterruptedException e1) {
@@ -224,23 +229,4 @@ public class MainFrame extends JFrame implements ComponentListener, WindowListen
 
 
 }
-
-//--Done
-//Pawn promotion!!
-//If black is my side, the board needs to be rotated accordingly +
-//Networking
-//En passan
-
-
-//--In progress
-// TODO: Wait for the opponent!!!!
-
-
-//--Future
-// TODO: Networking issues
-// TODO: Save the current game
-// TODO: Kings cannot get too close to each other!!
-// TODO: Stalemate : when the King is not under threat and cannot move to anywhere else. => draw (No one wins)
-// TODO: Check mate
-
 
