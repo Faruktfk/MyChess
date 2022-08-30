@@ -29,7 +29,7 @@ public class BoardPanel extends JPanel implements MouseListener {
 	public BoardPanel(int side) {
 		setSize(WIDTH, HEIGHT);
 		addMouseListener(this);
-		game = new GameLogic(GameLogic.LOCAL, side);
+		game = new GameLogic(this, GameLogic.LOCAL, side);
 		
 		 marginX = 205;
 		 marginY = 5;
@@ -107,9 +107,13 @@ public class BoardPanel extends JPanel implements MouseListener {
 		}
 	}
 	
-	public GameLogic newGame(int gameMode, int side) {
-		game = new GameLogic(gameMode, side);
+	public void emptyPossibleMoves() {
 		possibleMoves = null;
+	}
+	
+	public GameLogic newGame(int gameMode, int side) {
+		game = new GameLogic(this, gameMode, side);
+		emptyPossibleMoves();
 		sqrToLight = null;
 		repaint();
 		return game;
@@ -161,7 +165,7 @@ public class BoardPanel extends JPanel implements MouseListener {
 				game.move(sqrToLight.x/bSize, sqrToLight.y/bSize,x,y);
 			}
 			sqrToLight = null;
-			possibleMoves = null;
+			emptyPossibleMoves();
 		}
 
 		repaint();

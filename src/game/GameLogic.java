@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import multiplayer.ChessClient;
+import ui.BoardPanel;
 import ui.PopUpWindow;
 
 
@@ -13,6 +14,7 @@ public class GameLogic {
 	public static String HORIZONTAL= "abcdefgh", VERTICAL = "12345678";
 	private static final int CALCULATE_FOR_MOVE = 10, CALCULATE_FOR_CHECK = 11, CALCULATE_FOR_CHECKMATE = 12;
 	
+	private BoardPanel panelUI;
 	private Piece[][] board;
 	private int gameMode;
 	private int side;
@@ -26,7 +28,8 @@ public class GameLogic {
 
 
 
-	public GameLogic(int gameMode, int side) {
+	public GameLogic(BoardPanel panelUI, int gameMode, int side) {
+		this.panelUI = panelUI;
 		this.gameMode = gameMode;
 		this.side = side;
 		board = new Piece[8][8];
@@ -152,7 +155,7 @@ public class GameLogic {
 			
 			Piece tempEnPassantPiece = null;
 						
-			//En assant in action
+			//En passant in action
 			if(enPassant.containsKey(piece) && enPassant.get(piece).equals(new Point(x,y))) {
 				tempEnPassantPiece = board[oldY][x];
 				board[oldY][x] = null;
@@ -162,7 +165,7 @@ public class GameLogic {
 			board[oldY][oldX] = null;
 			piece.setLocation(x, y);
 			
-			// Incase of Check
+			// In case of Check
 			int tempCheck = check;
 			check = isInCheck();
 			if(check==turn) {
@@ -194,6 +197,8 @@ public class GameLogic {
 			
 			//Pawn promotion
 			if(piece.getName() == Piece.PAWN && (piece.getSide() == side ? piece.getLocation().y == 0 : piece.getLocation().y == 7)) {
+				panelUI.emptyPossibleMoves();
+				panelUI.repaint();
 				piece.promotePawn((int) new PopUpWindow(turn).getInput());	
 			}
 			
